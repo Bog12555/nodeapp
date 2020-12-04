@@ -3,7 +3,7 @@ const moment = require('moment')
 const axios = require('axios');
 module.exports = {
 	name: 'covid',
-  description: 'Covid19',
+  description: 'Show Covid19 Case Numbers',
   usage: '<country> [timer]',
 	execute(message, args) {
         let countdown= 20

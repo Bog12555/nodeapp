@@ -4,7 +4,7 @@ const main = require("../index.js");
   
 module.exports = {
 	name: 'play',
-	description: 'Play',
+	description: 'Play music',
 	 execute(message, args) {
      let queue=main.queue;
      let g_token=main.g_token;
@@ -39,7 +39,6 @@ module.exports = {
             songInfo = await ytdl.getInfo(googleparse);
             }
             else  {songInfo = await ytdl.getInfo(args[1]);}
-            console.log(songInfo);
             const song = {
               title: songInfo.videoDetails.title,
               url: songInfo.videoDetails.video_url
