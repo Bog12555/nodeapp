@@ -62,8 +62,6 @@ const login = new Promise ((resolve,reject) =>
 ///
 let google_token;
 
-// If modifying these scopes, delete your previously saved credentials
-// at ~/.credentials/google-apis-nodejs-quickstart.json
 let jwtClient = new google.auth.JWT(
 	privatekey.client_email,
 	null,
@@ -100,36 +98,24 @@ function days(today,days)
           else return moment(today.parsedOnString, "YYYY-MM-DD").subtract(days, 'days').format("YYYY-MM-DD");
         }
 
-let today, historicalData, jud, cov_str, c_out, cdf=0, alm_msg, alm_subs=-1;
+let today, historicalData, jud, cov_str, c_out, cdf=0;
 async function update(){
-	await axios.all([
-		axios.get(`https://www.googleapis.com/youtube/v3/channels?id=UC73wv11MF_jm6v7iz3kuO8Q&part=statistics&fields=items/statistics/subscriberCount&access_token=${google_token}`),
-		axios.get('https://datelazi.ro/latestData.json')
-	]).then(axios.spread((response1, response2) => {
-	   alm_subs=response1.data.items[0].statistics.subscriberCount;
+	await axios.get('https://datelazi.ro/latestData.json').then(response2 => {
 	  c_out=response2.data;
 		  today=c_out["currentDayStats"];
 		historicalData = c_out["historicalData"];
-	}))
+	})
 		  .then( () => {
 			try{
-				alm_msg="Abonati: "+`${alm_subs}`;
-				//console.log("Alm: "+`${alm_subs}`);
-				//console.log(c_out[0]['cases']);
-					//setTimeout(() => {
 						jud=today.incidence;
 						cdf=today.numberInfected-historicalData[days(today,1)].numberInfected;
 						cov_str=`Cazuri: ${today.numberInfected}`;	
-					//}, 1000);
 					
 		}
 			catch(error){
 				console.error(error);
-				cdf="-1";
-				cov_str="Cazuri: -1";	}
-		  })
-	  
-		
+				};
+			})		
 	.catch(error => {
 		console.error(error);
 	  refreshKey();
@@ -137,17 +123,10 @@ async function update(){
 	setTimeout(UpdateStatus, 3000);
 	//
 	}
-	/*async function loginSql(log){
-		  con.connect( err => {
-			if (err) console.error(err);})
-			if(log) console.log("[SQL] Database Successfully Connected!");
-	}*/
 	async function load()
 	{
 		google_token= await getkey();
-		const D_Log_out = await loginDiscord();
-		//const sqlstart = await loginSql(true);
-		//console.log("[Google] Token: "+`${google_token}`);
+		const loginDiscord = await loginDiscord();
 		console.log("[Google] API Successfully connected!");
 		exports.g_token = google_token;
 		exports.client= client;
@@ -157,7 +136,6 @@ async function update(){
 	pool.on('error', err =>
 	{
 		console.log(`[SQL] : ${err}`)
-		//if(err.code === 'PROTOCOL_CONNECTION_LOST') { con.release(); loginSql(false);} 
 	});
 	const queue = new Map();
 	exports.queue = queue;
@@ -179,9 +157,6 @@ async function update(){
 				prefix = result[0]['PREFIX'];
 		const args = message.content.slice(prefix.length).split(/ +/);
 		let command = args.shift().toLowerCase();
-		if (command==='2fa') command='validate';
-		if (command==='update' && message.author.id==="239136395665342474") {update(); message.delete(); return}
-		//client.channels.resolve(message.channel.id.toString()).messages.fetch(message.content.toString()).then((message => {message.delete()}));
 		if (!client.commands.has(command)) return;
 try {
 	if (message.content.substr(0,1)!==prefix && !(message.mentions.has(client.user.id))) {return;};
@@ -221,13 +196,7 @@ function UpdateStatus(){
 
 			  }});
 	}
-	
-	///AlmostIce
-	client.channels.fetch("700813443111977021").then(channel => channel.setName(alm_msg)).catch(error => console.error(error));
-	  setTimeout(update, 1200000);
-	
-	}
-	
+}	
 	client.on('guildCreate', guild =>
 	{
 		let sql = `INSERT INTO bot (SERVERID, SERVERNAME, JOINTIME) VALUES (${guild.id}, ${con.escape(guild.name)},${Date.now()})`;
@@ -249,30 +218,7 @@ client.on('guildUpdate', (oldGuild, newGuild) =>
 		pool.query(sql, function (err, result) {
 				if (err) throw err;
 				console.log(`[Bot] Left ${guild.name} (${guild.id})`);
-})});
-
-
-	
-        //Romail.ml
-		client.on('guildMemberAdd', member => {
-			// To compare, we need to load the current invite list.
-			member.guild.fetchInvites().then(guildInvites => {
-				// This is the *existing* invites for the guild.
-				const ei = invites[member.guild.id];
-		
-				// Update the cached invites
-				invites[member.guild.id] = guildInvites;
-		
-				// Look through the invites, find the one for which the uses went up.
-				const invite = guildInvites.find(i => ei.get(i.code).uses < i.uses);
-		
-				console.log(invite.code)
-		
-				if (invite.code === "xg44stZ") {
-					return member.addRole(member.guild.roles.find(role => role.name === "bog1200"));
-				}
-			})});
-		
+})});		
 	process.on('unhandledRejection', error => console.error('Caught Promise Rejection', error));
 	process.on('SIGINT',function(){
 	client.destroy();
