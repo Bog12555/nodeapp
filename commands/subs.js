@@ -2,7 +2,7 @@ const Discord = require('discord.js');
 const axios = require('axios');
 
 module.exports = {
-	name: 'yt',
+	name: 'subs',
 	description: 'Search channel subscribers',
 	execute(message, args, g_token) {
 	message.delete();	  
